@@ -167,33 +167,39 @@ class SonicWall:
         results = self.get(api_url)
         return results
 
-    def create_firewall_address(self, address_type, address, data):
+    def create_firewall_address(self, address_type, address_name, data):
         """
             Create firewall address record
             :param address_type: Type of address objects. Expected values are ipv4, ipv6, mac, fqdn
-            :param address: Address record to be created
+            :param address_name: Address record to be created
             :param data: JSON Data with which to create the address record
-                Ex: payload = '{"address_object": [{"ipv4": {"name": "Term Server Private","zone": "LAN","host": {"ip": "192.168.168.10"}}}]}'
+                For Creating One Address Object
+                    Ex: payload = '{"address_object":{"ipv4":{"name":"Term Server Private","zone":"LAN","host":{"ip":"192.168.168.20"}}}}'
+                For Creating Multiple Address Objects
+                    Ex: payload = '{"address_objects":[{"ipv4":{"name":"Test Address One","zone":"LAN","host":{"ip":"192.168.168.20"}}},
+                                                       {"ipv4":{"name":"Test Address Two","zone":"LAN","host":{"ip":"192.168.168.21"}}}.
+                                                       ..........]}'
             :return: HTTP Status Code
         """
         api_url = self.urlapi + 'address-objects/' + address_type
         # Check whether target object already exists
-        if self.does_exist(api_url + '/name/' + address):
+        if self.does_exist(api_url + '/name/' + address_name):
             return 424
         result = self.post(api_url, data)
         self.commit_pending_changes()
         return result
 
-    def update_firewall_address(self, address_type, address, data):
+    def update_firewall_address(self, address_type, address_name, data):
         """
             Update firewall address record with provided data
             :param address_type: Type of address objects. Expected values are ipv4, ipv6, mac, fqdn
-            :param address: name of the address record being updated
+            :param address_name: name of the address record being updated
             :param data: JSON Data with which to upate the address record
-                Ex: payload = "{'subnet': '192.168.0.0 255.255.255.0'}"
+                Any parameter like name, host or others that are to be updated should be provided in the json
+                Ex: payload = '{"address_object":{"ipv4":{"name":"Term Server Private","host":{"ip":"192.168.168.20"}}}}'
             :return: HTTP Status Code
         """
-        api_url = self.urlapi + 'address-objects/' + address_type + '/name/' + address
+        api_url = self.urlapi + 'address-objects/' + address_type + '/name/' + address_name
         # Check whether target object already exists
         if not self.does_exist(api_url):
             return 404
@@ -201,14 +207,81 @@ class SonicWall:
         self.commit_pending_changes()
         return result
 
-    def delete_firewall_address(self, address_type, address):
+    def delete_firewall_address(self, address_type, address_name):
         """
             Delete firewall address record
             :param address_type: Type of address objects. Expected values are ipv4, ipv6, mac, fqdn
-            :param address: Address record to be deleted
+            :param address_name: Address record to be deleted
             :return: HTTP Status Code
         """
-        api_url = self.urlapi + 'address-objects/' + address_type + '/name/' + address
+        api_url = self.urlapi + 'address-objects/' + address_type + '/name/' + address_name
+        if not self.does_exist(api_url):
+            return 404
+        result = self.delete(api_url)
+        self.commit_pending_changes()
+        return result
+
+    # API: Address Groups - IPv4, IPv6, MAC, FQDN
+    def get_address_group(self, group_type='ipv4', specific=False, filters=False):
+        """
+            Get address group object information from firewall
+            :param group_type: Type of address objects. Expected values are ipv4, ipv6, mac, fqdn
+            :param specific: If provided, a specific object will be returned. If not, all objects will be returned.
+            :param filters: If provided, the raw filter is appended to the API call.
+            :return: JSON data for all objects in scope of request, nested in a list.
+        """
+        api_url = self.urlapi + 'address-groups/' + group_type
+        if specific:
+            api_url += '/name/' + specific
+            if not self.does_exist(api_url):
+                return 404
+        elif filters:
+            api_url += "?filter=" + filters
+        results = self.get(api_url)
+        return results
+
+    def create_address_group(self, group_type, group_name, data):
+        """
+            Create address group object
+            :param group_type: Type of address objects. Expected values are ipv4, ipv6, mac, fqdn
+            :param group_name: Address record to be created
+            :param data: JSON Data with which to create the address record
+                Ex: payload = '{"address_groups":[{"ipv4":{"name":"Testing Group Creation","address_object":{"ipv4":[{"name":"New Address"}]}}}]}'
+            :return: HTTP Status Code
+        """
+        api_url = self.urlapi + 'address-groups/' + group_type
+        # Check whether target object already exists
+        if self.does_exist(api_url + '/name/' + group_name):
+            return 424
+        result = self.post(api_url, data)
+        self.commit_pending_changes()
+        return result
+
+    def update_address_group(self, group_type, group_name, data):
+        """
+            Update firewall address record with provided data
+            :param group_type: Type of address objects. Expected values are ipv4, ipv6, mac, fqdn
+            :param group_name: name of the address record being updated
+            :param data: JSON Data with which to upate the address record
+                Ex: payload = '{"address_group":{"ipv4":{"name":"Testing Group Creation Update"}}}'
+            :return: HTTP Status Code
+        """
+        api_url = self.urlapi + 'address-groups/' + group_type + '/name/' + group_name
+        # Check whether target object already exists
+        if not self.does_exist(api_url):
+            return 404
+        result = self.put(api_url, data)
+        self.commit_pending_changes()
+        return result
+
+    def delete_address_group(self, group_type, group_name):
+        """
+            Delete firewall address group object
+            :param group_type: Type of address objects. Expected values are ipv4, ipv6, mac, fqdn
+            :param group_name: Address record to be deleted
+            :return: HTTP Status Code
+        """
+        api_url = self.urlapi + 'address-groups/' + group_type + '/name/' + group_name
         if not self.does_exist(api_url):
             return 404
         result = self.delete(api_url)
