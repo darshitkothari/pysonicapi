@@ -25,15 +25,29 @@ The output of this function will be a dictionary with 'address_object' as a sing
 
 Create
 ~~~~~~
-Create
+To create an address object, you''ll need to provide 3 parameters to the create_firewall_address function viz. the ip version type ("**version**"), name of the address_object being created ("**address_name**") and a json formatted object configuration ("**data**"):
+
+>>> payload = '{"address_object": {"ipv4": {"name": "Test Address", "zone": "LAN", "host": {"ip": "192.168.168.20"}}}}'
+>>> device.create_firewall_address(version='ipv4', address_name='Test Address', data=payload)
+200
 
 Update
 ~~~~~~
-Update
+To update an address object, you'll need to provide 3 parameters to the update_firewall_address function viz. the ip version type ("**version**"), name of the address_object being created ("**address_name**") and a json formatted object configuration ("**data**" with onlt the fields that are to be updated):
+
+>>> # To update the name of the firewall address object
+>>> payload = '{"address_object": {"ipv4": {"name": "Updating Test Address"}}}'
+>>> device.update_firewall_address(version='ipv4', address_name='Test Address', data=payload)
+200
+>>> # To update the host ip of the firewall address object
+>>> payload = '{"address_object": {"ipv4": {"host": {"ip": "192.168.168.15"}}}}'
+>>> device.update_firewall_address(version='ipv4', address_name='Test Address', data=payload)
+
+Note: you can’t just use a Python dictionary as your payload. Please refer to the "400" section in :doc:`common_issues`
 
 Delete
 ~~~~~~
-To delete an address object, you just need to pass the "address_type" and "address_name" to the delete_firewall_address function:
+To delete an address object, you just need to pass the 'version' and 'address_name' to the delete_firewall_address function:
 
 >>> device.delete_firewall_address(version='ipv4', address_name='Test Address')
 200
@@ -64,12 +78,30 @@ The output of this function will be a dictionary with 'address_group' as a singl
 
 Create
 ~~~~~~
-Create
+To create an address group, you'll need to provide 3 parameters to the create_address_group function viz. the ip version type ("**version**"), name of the address_group being created ("**group_name**") and a json formatted object configuration ("**data**"):
+
+>>> payload = '{"address_group": {"ipv4": {"name": "Testing Group Creation", "address_object": {"ipv4": [{"name": "Updating Test Address"}]}}}}'
+>>> device.create_address_group(version='ipv4', group_name='Testing Group Creation', data=payload)
+200
 
 Update
 ~~~~~~
-Update
+To update an address group, you'll need to provide 3 parameters to the create_address_group function viz. the ip version type ("**version**"), name of the address_group being created ("**group_name**") and a json formatted object configuration ("**data**"):
+
+>>> # To update the name of the firewall adress group
+>>> payload = '{"address_group": {"ipv4": {"name": "Updating Testing Group Creation"}}}'
+>>> device.update_address_group(version='ipv4', group_name='Testing Group Creation', data=payload)
+>>> # To update firewall address objects in the firewall adress group
+>>> payload =
+>>> device.update_address_group(version='ipv4', group_name='Testing Group Creation', data=payload)
+
 
 Delete
 ~~~~~~
-To delete
+To delete an address group, you just need to pass the 'version' and 'group_name' to the delete_address_group function:
+
+>>> device.delete_address_group(version='ipv4', group_name='Test Group 1')
+200
+>>> device.delete_address_group(version='ipv4', group_name='Test Group 1')
+404
+
