@@ -281,3 +281,72 @@ class SonicWall:
         result = self.delete(api_url)
         self.commit_pending_changes()
         return result
+
+    # API: Service Objects
+    def get_service_object(self, specific=False):
+        """
+            Retrieve service object configuration from the firewall
+            :param specific: If provided, a specific object will be returned. If not, all objects will be returned.
+            :return: JSON data for all objects in scope of request, nested in a list.
+        """
+        api_url = self.urlapi + 'service-objects'
+        if specific:
+            api_url += '/name/' + specific
+            if not self.does_exist(api_url):
+                return 404
+        result = self.get(api_url)
+        return result
+
+    def create_service_object(self):
+        pass
+
+    def update_service_object(self):
+        pass
+
+    def delete_service_object(self, object_name):
+        """
+            Delete firewall service object
+            :param object_name: Address record to be deleted
+            :return: HTTP Status Code
+        """
+        api_url = self.urlapi + 'service-objects/name/' + object_name
+        if not self.does_exist(api_url):
+            return 404
+        result = self.delete(api_url)
+        self.commit_pending_changes()
+        return result
+
+    # API: Service Groups
+    def get_service_group(self, specific=False):
+        """
+            Retrieve service group configuration from the firewall
+            :param specific: If provided, a specific object will be returned. If not, all objects will be returned.
+            :return: JSON data for all objects in scope of request, nested in a list.
+        """
+        api_url = self.urlapi + 'service-groups'
+        if specific:
+            api_url += '/name/' + specific
+            if not self.does_exist(api_url):
+                return 404
+        result = self.get(api_url)
+        return result
+
+    def create_service_group(self):
+        pass
+
+    def update_service_group(self):
+        pass
+
+    def delete_service_group(self, group_name):
+        """
+            Delete firewall service group object
+            :param group_name: Address record to be deleted
+            :return: HTTP Status Code
+        """
+        api_url = self.urlapi + 'service-groups/name/' + group_name
+        if not self.does_exist(api_url):
+            return 404
+        result = self.delete(api_url)
+        self.commit_pending_changes()
+        return result
+
