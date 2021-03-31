@@ -14,7 +14,14 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 class SonicWall:
-    def __init__(self, ipaddr, username, password, timeout=30, port="443"):
+    def __init__(self, ipaddr, username, password, timeout=5, port="443"):
+        """
+            :param ipaddr: host for the device ('http://10.3.1.254)
+            :param username: username for the device
+            :param password: password for the device
+            :param timeout: (optional) timeout for the request
+            :param port: (optional) port on which the device works
+        """
         self.ipaddr = ipaddr
         self.username = username
         self.password = password
@@ -211,11 +218,11 @@ class SonicWall:
             self.commit_pending_changes()
         return result
 
-    # API: Address Groups - IPv4, IPv6, MAC, FQDN
-    def get_address_group(self, version, specific=False):
+    # API: Address Groups - IPv4, IPv6
+    def get_address_group(self, version='ipv4', specific=False):
         """
             Get address group object information from firewall
-            :param version: Type of address objects. Expected values are ipv4, ipv6, mac, fqdn
+            :param version: Type of address objects. Expected values are ipv4, ipv6
             :param specific: If provided, a specific object will be returned. If not, all objects will be returned.
             :return: JSON data for all objects in scope of request, as a dict with single key 'address_groups' and value
              being a list of address objects in the device
@@ -231,7 +238,7 @@ class SonicWall:
     def create_address_group(self, version, group_name, data):
         """
             Create address group object
-            :param version: Type of address objects. Expected values are ipv4, ipv6, mac, fqdn
+            :param version: Type of address objects. Expected values are ipv4, ipv6
             :param group_name: Address record to be created
             :param data: JSON Data with which to create the address record
                 Ex: 1. Multiple Address Groups:
@@ -350,3 +357,17 @@ class SonicWall:
         self.commit_pending_changes()
         return result
 
+    # API: Zone Configuration
+    def get_zone(self, specific=False):
+        """
+            Retrieve service group configuration from the firewall
+            :param specific: If provided, a specific object will be returned. If not, all objects will be returned.
+            :return: JSON data for all objects in scope of request, nested in a list.
+        """
+        api_url = self.urlapi + 'zones'
+        if specific:
+            api_url += '/name/' + specific
+            if not self.does_exist(api_url):
+                return 404
+        result = self.get(api_url)
+        return result
